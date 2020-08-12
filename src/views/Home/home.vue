@@ -29,7 +29,7 @@ watch: {},
 methods: {
   clickTagItem (tag) {
     // TODO
-    console.log(tag)
+    console.log(tag,11)
   }
 },
 created() {
