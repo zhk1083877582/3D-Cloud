@@ -3,16 +3,10 @@
 #### 项目介绍
 Vue标签云UI组件
 
-### 结果样式
-![示例](http://oztg5bt5t.bkt.clouddn.com//blog/images/tagCloud%E7%A4%BA%E4%BE%8B.gif)
+
 #### 安装教程
 
-1. ```npm install v-tag-cloud -S```
-2. 在main.js中
-```js
-import tagCloud from 'v-tag-cloud'
-Vue.use(tagCloud)
-```
+1. ```npm install ```
 
 #### 使用说明
 
