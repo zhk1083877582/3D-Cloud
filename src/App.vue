@@ -1,69 +1,138 @@
 <template>
   <div id="app">
-    1111111
-    <img src="./assets/logo.png">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank">Twitter</a></li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li><a href="http://router.vuejs.org/" target="_blank">vue-router</a></li>
-      <li><a href="http://vuex.vuejs.org/" target="_blank">vuex</a></li>
-      <li><a href="http://vue-loader.vuejs.org/" target="_blank">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank">awesome-vue</a></li>
-    </ul>
-    <tag-cloud :data="hotTag" @clickTag="clickTagItem"></tag-cloud>
+    <top-header v-show="isshowTopHeader&&!wxFlag" :title="pOption.title"/>
+    <router-view />
   </div>
 </template>
 
 <script>
+import { mapAction,mapState,mapGetters } from 'vuex';
+import TopHeader from '@/components/header/header.vue';
 export default {
-  name: 'app',
-  data () {
-    return {
-      msg: 'Welcome to Your Vue.js App',
-      hotTag: [{"id":"05023f8da31c4b4187cc6899e2a3aec2","name":"镇远县"},{"id":"0ef028e5278f4f5ca31f99f1bd22b1cc","name":"剑河县"},{"id":"1a32ef04d3c548eaa6777abb46da32f2","name":"台江县"},{"id":"2c26488325bd493687d16315fe0e5fdd","name":"岑巩县"},{"id":"3a786111828a4b9f89ae9da25753eedd","name":"黎平"},{"id":"4ed593eed91b4244969995237f5c96c5","name":"丹寨县"},{"id":"615d2c178f1a47cb8d473823e74f5386","name":"凯里市"},{"id":"76f652df03db43349272a9aff492b065","name":"榕江县"},{"id":"8ff29d0d35e548feb945063b34ed9c9b","name":"黄平县"},{"id":"a8ac2170008746fdadc05ea461bc5e37","name":"雷山县"}]
+  name: 'App',
+  components:{
+    TopHeader,
+  },
+  data(){
+    return{
+      pOption:{},
+      wxFlag:true,
+      isshowTopHeader:false,
     }
   },
-  methods: {
-    clickTagItem (tag) {
-      // TODO
-      console.log(tag)
-    }
+  computed: {
+        //获取vuex中的cityCode
+        ...mapState({
+            isLoading:state=>state.isLoading,
+            isShowDownload:state=>state.isShowDownload
+        }),
+        // ...mapGetters([ShowDownload])
+    },
+  created() {
+        if(this.$tool.getStorage('M-token')){
+          this.$store.dispatch('saveUserInfo',{Token:this.$tool.getStorage('M-token')});
+        }
+        this.$router.beforeResolve((to, from, next) => {
+          this.setPageOption(to);
+            next()
+        })
+        this.isWeixin()
+        // this.checkChannel();
+  },
+  mounted() {
+
+  },
+  methods:{
+    setPageOption(to) { //设置头部名
+        this.pOption = this.$pOption[to.name];
+        if (typeof this.pOption.title === "function") {
+          this.Title = document.title = this.pOption.title.call(this, to);
+        } else {
+          if (this.pOption.children) {
+            this.pOption = this.pOption.children[to.params.children];
+          }
+          this.Title = document.title = this.pOption.title || "同策好房";
+        }
+        //判断是否展示头部组件
+        if( this.pOption.name !=='Home' && this.pOption.name !== 'videoPlayer'&& this.pOption.name !== 'error'){
+          this.isshowTopHeader = true
+        }else{
+          this.isshowTopHeader = false
+        }
+      },
+      isWeixin() {
+        var ua = navigator.userAgent.toLowerCase();
+        if (ua.match(/MicroMessenger/i) == "micromessenger") {
+          this.wxFlag = true;
+          this.$store.dispatch('saveIsShowHead',false)
+        } else {
+          this.$store.dispatch('saveIsShowHead',true)
+          this.wxFlag = false;
+        }
+      },
+      // checkChannel(){
+      //    var ua = navigator.userAgent,
+      //    isWindowsPhone = /(?:Windows Phone)/.test(ua),
+      //    isSymbian = /(?:SymbianOS)/.test(ua) || isWindowsPhone,
+      //    isAndroid = /(?:Android)/.test(ua),
+      //    isFireFox = /(?:Firefox)/.test(ua),
+      //    isChrome = /(?:Chrome|CriOS)/.test(ua),
+      //    isTablet = /(?:iPad|PlayBook)/.test(ua) || (isAndroid && !/(?:Mobile)/.test(ua)) || (isFireFox && /(?:Tablet)/.test(ua)),
+      //    isPhone = /(?:iPhone)/.test(ua) && !isTablet,
+      //    isPc = !isPhone && !isAndroid && !isSymbian;
+      //    let os =  {
+      //        isTablet: isTablet,
+      //        isPhone: isPhone,
+      //        isAndroid: isAndroid,
+      //        isPc: isPc
+      //    };	
+      //   if (os.isTablet || os.isPc) {
+      //     document.querySelector("html").style.width="750px";
+      //     document.querySelector("html").style.margin="auto";
+      //     document.querySelector("body").classList.add("pc")
+      //     // let iWidth = document.documentElement.clientWidth;
+	    //     // document.getElementsByTagName('html')[0].style.fontSize = 100 * iWidth / 750 + 'px'; 
+      //   } 
+      // }
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+ @import './common/css/reset.css';
+#app{height: 100%;}
+.modelBess1{
+  width: 100%;
+  height: 100%;
+  background-color: rgba(55,55,55,.7);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
 }
-
-h1, h2 {
-  font-weight: normal;
+.icon-close{
+  position: absolute;
+  right: 20px;
+  top: 28px;
 }
-
-ul {
-  list-style-type: none;
-  padding: 0;
+.icon-close img{
+  width: 14px;
+  height: 14px;
 }
-
-li {
-  display: inline-block;
-  margin: 0 10px;
+.unloadInstall{
+  width: 70px;
+  height: 100px;
+  position: absolute;
+  right: 20px;
+  top: 13px;
+  transform: rotate(7deg );
 }
-
-a {
-  color: #42b983;
+.unloadMess{
+  color: white;
+  position: absolute;
+  right: 28px;
+  top: 114px;
+  font-family: cursive;
+  font-size: 20px;
 }
 </style>

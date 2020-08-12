@@ -15,13 +15,17 @@ export default {
     config: {
       type: Object,
       default: null
+    },
+    colorTxt:{
+      type: String,
+      default: '255, 195, 0,'
     }
   },
   data() {
     return {
       option: {
         radius: 120, // 滚动半径，单位px
-        maxFont: 24, // 最大字体大小
+        maxFont: 14, // 最大字体大小
         color: null, // 字体颜色。为空时随机
         rotateAngleXbase: 600, // 默认旋转速度基数，数越小速度越快
         rotateAngleYbase: 600,
@@ -55,17 +59,29 @@ export default {
     _initTags() {
       this.rotateAngleX = Math.PI / this.option.rotateAngleXbase
       this.rotateAngleY = Math.PI / this.option.rotateAngleYbase
-      // 鼠标悬浮改变转速和方向
+      // // 鼠标悬浮改变转速和方向
+      // if (this.option.hover) {
+      //   const _self = this
+      //   this.$refs.wrapper.onmousemove = function(e) {
+      //     _self.rotateAngleY =
+      //       (e.pageX - this.offsetLeft - this.offsetWidth / 2) / 10000
+      //     _self.rotateAngleX =
+      //       -(e.pageY - this.offsetTop - this.offsetHeight / 2) / 10000
+      //   }
+      // } else {
+      //   this.$refs.wrapper.onmousemove = null
+      // }
+      // 鼠标悬浮改变转速和方向 移动端
       if (this.option.hover) {
         const _self = this
-        this.$refs.wrapper.onmousemove = function(e) {
+        this.$refs.wrapper.ontouchmove = function(e) {
           _self.rotateAngleY =
-            (e.pageX - this.offsetLeft - this.offsetWidth / 2) / 10000
+            (e.changedTouches[0].pageX - this.offsetLeft - this.offsetWidth / 2) / 5000
           _self.rotateAngleX =
-            -(e.pageY - this.offsetTop - this.offsetHeight / 2) / 10000
+            -(e.changedTouches[0].pageY - this.offsetTop - this.offsetHeight / 2) / 5000
         }
       } else {
-        this.$refs.wrapper.onmousemove = null
+        this.$refs.wrapper.ontouchmove = null
       }
 
       for (var i = 0, length = this.data.length; i < length; i++) {
@@ -81,13 +97,7 @@ export default {
         } else {
           // 随机颜色
           this.$refs.tag[i].style.color =
-            'rgb(' +
-            Math.round(255 * Math.random()) +
-            ',' +
-            Math.round(255 * Math.random()) +
-            ',' +
-            Math.round(255 * Math.random()) +
-            ')'
+            'rgba('+this.colorTxt + Math.random() +')'
         }
         // 每个标签对象都有四对值
         var tag = {
@@ -172,8 +182,8 @@ export default {
 
 <style scoped>
 .tag-cloud {
-  width: 300px;
-  height: 300px;
+  width: 100%;
+  height: 400px;
   position: relative;
   color: #333;
   margin: 0 auto;
